@@ -1,0 +1,91 @@
+version: '3.9'
+
+x-common-server-settings: &matrix-settings
+  image: ${MATRIX_IMAGE:-matrixdotorg/synapse:v1.51.0}
+  restart: 'no'
+  networks:
+    - federation
+  expose:
+    - 8448
+
+x-common-proxy-settings: &proxy-settings
+  image: "nginx:1.21.6"
+  restart: 'no'
+  volumes:
+    - ./proxy/certs/:/etc/nginx/conf.d/certs:ro
+    - ./proxy/js:/etc/nginx/conf.d/js
+    - ./proxy/${RESTRICTION:-with}.conf.template:/etc/nginx/templates/default.conf.template:ro
+    - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+  entrypoint: sh -c 'touch /etc/nginx/conf.d/js/input.json && chown nginx /etc/nginx/conf.d/js/input.json && /docker-entrypoint.sh nginx -g "daemon off;" -c /etc/nginx/nginx.conf'
+  networks:
+    - federation
+
+services:
+  register_service:
+    image: "nginx:1.21.6"
+    container_name: registration_service
+    volumes:
+      - ./registration_service/default.conf:/etc/nginx/conf.d/default.conf:ro
+    expose:
+      - 8080
+    networks:
+      federation:
+        ipv4_address: 172.0.0.16
+
+  first.server:
+    container_name: first.server
+    <<: *proxy-settings
+    environment:
+      - SERVER_NUMBER=first
+    ports:
+      - "8888:8448"
+
+  first.m_server:
+    container_name: first.m_server
+    <<: *matrix-settings
+    ports:
+      - 8008:8008
+    volumes:
+      - ./config_a/:/data
+      - ./root-cert.pem:/app/tvr-root-ca.crt
+      - ./setup.py:/setup.py
+
+  second.server:
+    container_name: second.server
+    image: "nginx:1.21.6"
+    <<: *proxy-settings
+    environment:
+      - SERVER_NUMBER=second
+
+  second.m_server:
+    container_name: second.m_server
+    <<: *matrix-settings
+    ports:
+      - 8009:8008
+    volumes:
+      - ./config_b/:/data
+      - ./root-cert.pem:/app/tvr-root-ca.crt
+      - ./setup.py:/setup.py
+
+  third.server:
+    container_name: third.server
+    <<: *proxy-settings
+    environment:
+      - SERVER_NUMBER=third
+
+  third.m_server:
+    container_name: third.m_server
+    <<: *matrix-settings
+    ports:
+      - 8010:8008
+    volumes:
+      - ./config_c/:/data
+      - ./root-cert.pem:/app/tvr-root-ca.crt
+      - ./setup.py:/setup.py
+
+networks:
+  federation:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.0.0/16

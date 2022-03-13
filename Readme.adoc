@@ -1,0 +1,98 @@
+= Matrix Simmulation
+:toc:
+
+== Requirements
+
+The whole project supports only windows os and is executed in gitbash.
+It may work for linux and other shells as well.
+Please note that commands can be different.
+
+[cols ="1,2"]
+|===
+|Programms |version
+|Python|9.3
+|Docker|20.10.12
+|Docker-Desktop|4.4.4
+|Git|2.33.1
+|===
+
+=== Python modules
+
+You can find all needed packages in the requirements.txt.
+
+To create python env execute following commands:
+
+[source]
+python -m venv venv
+source ./venv/Scripts/activate
+pip install -r requirements.txt
+
+== Scripts
+
+All scripts have their own manual if you start them with the "-h" flag.
+Please know that some of them will work without any parameters and some of them need you to enter some.
+If you have to enter some the manual will comes up and keep your back.
+
+=== Start test environment
+
+You can find the `start_test_env.sh` which setup all needed.
+You can run
+
+```
+./start_test_env.sh -h
+```
+
+for getting an overview about the different options.
+
+Most common commands for a clean environment:
+Without restricting Proxies:
+
+```
+./start_test_env -w -c -d
+```
+
+With restricting Proxies:
+
+```
+./start_test_env -c -d
+```
+
+For shutting down:
+
+```
+./start_test_env -s
+```
+
+=== Start tests
+
+To start predefined test-scripts use:
+
+* `internal.sh` -> for chat messages between users on the same matrix server
+* `federal.sh` -> for chat messages between users on different matrix servers
+
+You can extend this by adding `2` or `3` behind the script.
+The number represents the amount of servers you want to involve.
+On default only the first server will invite and all users will try to send messages.
+
+In addition you can alternate the name of the room by adding `-r` <custom_room_name>. Use this to use a fresh room.
+
+=== Change restriction on proxies
+
+This can be done by using the `set_allowed_servers.sh`.
+You can add an allowed server by put the numbers 1 to 3 behind the script.
+
+* 1 -> first.server
+* 2 -> second.server
+* 3 -> third.server
+
+=== Personal client
+
+You can use this script for creating users and send messages between the servers manually.
+For further information of usage just enter
+
+```
+./personal_client.sh
+```
+
+in your shell and a manual will appear.
+
