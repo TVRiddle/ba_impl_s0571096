@@ -48,19 +48,19 @@ Most common commands for a clean environment:
 Without restricting Proxies:
 
 ```
-./start_test_env -w -c -d
+./start_test_env.sh -w -c -d
 ```
 
 With restricting Proxies:
 
 ```
-./start_test_env -c -d
+./start_test_env.sh -c -d
 ```
 
 For shutting down:
 
 ```
-./start_test_env -s
+./start_test_env.sh -s
 ```
 
 === Start tests
